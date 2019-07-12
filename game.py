@@ -27,15 +27,13 @@ def shuffle_field():
     field = list(range(1, 16))
     field.append(EMPTY_MARK)
     for i in range(100):
-        old_pos = field.index(EMPTY_MARK)
-        new_pos = old_pos + MOVES[random.choice(['w', 'a', 's', 'd'])]
+        random_key = random.choice(list(MOVES))
         try:
-            field[old_pos], field[new_pos] = field[new_pos], field[old_pos]
+            field = perform_move(field, random_key)
         except IndexError:
-            pass
+            continue
 
     return field
-    pass
 
 
 def print_field(field):
@@ -75,14 +73,14 @@ def perform_move(field, key):
 
     old_pos = field.index(EMPTY_MARK)
     new_pos = old_pos + MOVES[key]
-    if key == 'w' and old_pos in (0, 1, 2, 3):
-        raise IndexError
-    if key == 'a' and old_pos in (0, 4, 8, 12):
-        raise IndexError
-    if key == 's' and old_pos in (12, 13, 14, 15):
-        raise IndexError
-    if key == 'd' and old_pos in (3, 7, 11, 15):
-        raise IndexError
+    if key == 'w' and old_pos < 4:
+        raise IndexError('Движение вверх невозможно')
+    if key == 'a' and old_pos % 4 == 0:
+        raise IndexError('Движение влево невозможно')
+    if key == 's' and old_pos > 11:
+        raise IndexError('Движение вниз невозможно')
+    if key == 'd' and old_pos % 4 == 3:
+        raise IndexError('Движение вправо невозможно')
     field[old_pos], field[new_pos] = field[new_pos], field[old_pos]
 
     return field
@@ -99,9 +97,8 @@ def handle_user_input():
     """
     while True:
         user_input = input('Сделайте ход: w,a,s,d: ')
-        if user_input in ('w', 'a', 's', 'd'):
+        if user_input in MOVES.keys():
             return user_input
-    pass
 
 
 def main():
@@ -119,8 +116,8 @@ def main():
             key = handle_user_input()
             field = perform_move(field, key)
             move_counter += 1
-        except IndexError:
-            print('Ход не возможен')
+        except IndexError as e:
+            print(e)
         except KeyboardInterrupt:
             print('shutting down')
             break
